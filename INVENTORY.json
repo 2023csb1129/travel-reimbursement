@@ -1,0 +1,387 @@
+{
+  "application": {
+    "name": "Reimbursify",
+    "version": "2.0",
+    "framework": "Next.js 15 (App Router)",
+    "auth_system": "NextAuth v4 (Credentials Provider)",
+    "database": "Prisma ORM with SQLite",
+    "build_status": "🟡 Has runtime errors (auth import issues)",
+    "dev_server_status": "Running with errors",
+    "overall_completion": "65%"
+  },
+  "pages": {
+    "public": {
+      "total": 3,
+      "complete": 3,
+      "list": [
+        {
+          "path": "/",
+          "file": "src/app/page.tsx",
+          "status": "✅ Complete",
+          "description": "Landing page with feature highlights, redirects to signin if not auth"
+        },
+        {
+          "path": "/auth/signin",
+          "file": "src/app/auth/signin/page.tsx",
+          "status": "✅ Complete",
+          "description": "Email/password authentication form with sign-up"
+        },
+        {
+          "path": "/offline",
+          "file": "src/app/offline/page.tsx",
+          "status": "✅ Complete",
+          "description": "PWA offline fallback page"
+        }
+      ]
+    },
+    "admin": {
+      "total": 4,
+      "complete": 4,
+      "role_required": "ADMINISTRATOR",
+      "list": [
+        {
+          "path": "/admin/forms",
+          "file": "src/app/(admin)/admin/forms/page.tsx",
+          "status": "✅ Complete",
+          "description": "Form template management - list, create, delete forms",
+          "features": ["List templates", "Create form", "Change active status", "Delete"]
+        },
+        {
+          "path": "/admin/forms/[id]/edit",
+          "file": "src/app/(admin)/admin/forms/[id]/edit/page.tsx",
+          "status": "✅ Complete",
+          "description": "Form builder/editor for creating/editing form fields",
+          "features": ["Edit field properties", "Add/delete fields", "Version tracking", "Save schema"]
+        },
+        {
+          "path": "/admin/submissions",
+          "file": "src/app/(admin)/admin/submissions/page.tsx",
+          "status": "✅ Complete",
+          "description": "Submissions dashboard with filtering and status management",
+          "features": ["List all submissions", "Filter by status/form", "Export to CSV", "View timeline"]
+        },
+        {
+          "path": "/admin/submissions/[id]",
+          "file": "src/app/(admin)/admin/submissions/[id]/page.tsx",
+          "status": "✅ Complete",
+          "description": "Submission detail view with review and approval interface",
+          "features": ["View submitted data", "Add review notes", "Approve/reject", "Change status"]
+        }
+      ]
+    },
+    "submitter": {
+      "total": 8,
+      "complete": 2,
+      "incomplete": 6,
+      "role_required": "Non-ADMINISTRATOR users",
+      "list": [
+        {
+          "path": "/trips",
+          "file": "src/app/(submitter)/trips/page.tsx",
+          "status": "✅ Complete",
+          "description": "List all user trips with filtering and search",
+          "features": ["Filter by status", "Search", "Sort", "Mark favorite/archive", "View stats"]
+        },
+        {
+          "path": "/trips/new",
+          "file": "MISSING",
+          "status": "❌ Missing",
+          "description": "Create new trip form",
+          "note": "API exists (POST /api/trips), but no UI page to create trips"
+        },
+        {
+          "path": "/trips/[id]",
+          "file": "MISSING",
+          "status": "❌ Missing",
+          "description": "Trip detail view with expense breakdown",
+          "note": "No page.tsx file exists; critical for viewing trip details"
+        },
+        {
+          "path": "/trips/[id]/expenses/new",
+          "file": "src/app/(submitter)/trips/[id]/expenses/new/page.tsx",
+          "status": "✅ Complete",
+          "description": "Expense creation form for a trip",
+          "features": ["Enter expense details", "Select payment method", "Choose category", "Set currency"]
+        },
+        {
+          "path": "/trips/[id]/expenses/[id]",
+          "file": "MISSING",
+          "status": "❌ Missing",
+          "description": "View/edit individual expense details",
+          "note": "No UI for viewing or editing expenses after creation"
+        },
+        {
+          "path": "/trips/analytics",
+          "file": "MISSING",
+          "status": "❌ Missing",
+          "description": "Trip analytics dashboard (REFERENCED IN CODE BUT NOT CREATED)",
+          "note": "Link exists in navbar, but page doesn't exist"
+        },
+        {
+          "path": "/profile",
+          "file": "MISSING",
+          "status": "❌ Missing",
+          "description": "User profile and settings page"
+        },
+        {
+          "path": "/profile/payment-cards",
+          "file": "MISSING",
+          "status": "❌ Missing",
+          "description": "Manage saved payment cards",
+          "note": "APIs fully functional (/api/profile/payment-cards/*) but no UI"
+        }
+      ]
+    }
+  },
+  "api_endpoints": {
+    "summary": {
+      "total": 38,
+      "functional": 38,
+      "unused_or_legacy": 5,
+      "with_issues": 1
+    },
+    "by_category": {
+      "trips": {
+        "total": 5,
+        "endpoints": [
+          { "method": "GET", "path": "/api/trips", "status": "✅", "description": "List user trips with filters" },
+          { "method": "POST", "path": "/api/trips", "status": "✅", "description": "Create new trip" },
+          { "method": "GET", "path": "/api/trips/[id]", "status": "✅", "description": "Get trip details" },
+          { "method": "PATCH", "path": "/api/trips/[id]", "status": "✅", "description": "Update trip" },
+          { "method": "DELETE", "path": "/api/trips/[id]", "status": "✅", "description": "Delete trip" }
+        ]
+      },
+      "expenses": {
+        "total": 8,
+        "endpoints": [
+          { "method": "GET", "path": "/api/expenses", "status": "✅", "description": "List expenses for trip" },
+          { "method": "POST", "path": "/api/expenses", "status": "✅", "description": "Create expense" },
+          { "method": "GET", "path": "/api/expenses/[id]", "status": "✅", "description": "Get expense details" },
+          { "method": "PATCH", "path": "/api/expenses/[id]", "status": "✅", "description": "Update expense" },
+          { "method": "DELETE", "path": "/api/expenses/[id]", "status": "✅", "description": "Delete expense" },
+          { "method": "GET", "path": "/api/expenses/[id]/bills", "status": "✅", "description": "List bills for expense" },
+          { "method": "POST", "path": "/api/expenses/[id]/bills", "status": "✅", "description": "Add bill to expense" },
+          { "method": "GET", "path": "/api/expenses/bills", "status": "✅", "description": "List all bills" }
+        ]
+      },
+      "forms": {
+        "total": 5,
+        "endpoints": [
+          { "method": "GET", "path": "/api/forms", "status": "✅", "description": "List form templates" },
+          { "method": "POST", "path": "/api/forms", "status": "✅", "description": "Create form template" },
+          { "method": "GET", "path": "/api/forms/[id]", "status": "✅", "description": "Get form template" },
+          { "method": "PATCH", "path": "/api/forms/[id]", "status": "✅", "description": "Update form template" },
+          { "method": "DELETE", "path": "/api/forms/[id]", "status": "✅", "description": "Delete form template" }
+        ]
+      },
+      "submissions": {
+        "total": 5,
+        "endpoints": [
+          { "method": "GET", "path": "/api/submissions", "status": "✅", "description": "List submissions" },
+          { "method": "POST", "path": "/api/submissions", "status": "✅", "description": "Create submission" },
+          { "method": "GET", "path": "/api/submissions/[id]", "status": "✅", "description": "Get submission" },
+          { "method": "PATCH", "path": "/api/submissions/[id]", "status": "✅", "description": "Update submission status/notes" },
+          { "method": "DELETE", "path": "/api/submissions/[id]", "status": "✅", "description": "Delete submission" }
+        ]
+      },
+      "payments_and_exchange": {
+        "total": 8,
+        "endpoints": [
+          { "method": "GET", "path": "/api/profile/payment-cards", "status": "✅", "description": "List payment cards" },
+          { "method": "POST", "path": "/api/profile/payment-cards", "status": "✅", "description": "Add payment card" },
+          { "method": "GET", "path": "/api/profile/payment-cards/[id]", "status": "✅", "description": "Get payment card" },
+          { "method": "PATCH", "path": "/api/profile/payment-cards/[id]", "status": "✅", "description": "Update payment card" },
+          { "method": "DELETE", "path": "/api/profile/payment-cards/[id]", "status": "✅", "description": "Delete payment card" },
+          { "method": "GET", "path": "/api/exchange-rates", "status": "✅", "description": "Get exchange rates" },
+          { "method": "POST", "path": "/api/exchange-rates", "status": "✅", "description": "Create/update exchange rate" }
+        ]
+      },
+      "other": {
+        "total": 7,
+        "endpoints": [
+          { "method": "GET", "path": "/api/institutes", "status": "✅", "description": "List institutes" },
+          { "method": "POST", "path": "/api/institutes", "status": "✅", "description": "Create institute" },
+          { "method": "PATCH", "path": "/api/institutes", "status": "✅", "description": "Update institute" },
+          { "method": "DELETE", "path": "/api/institutes", "status": "✅", "description": "Delete institute" },
+          { "method": "GET", "path": "/api/bills/[id]", "status": "✅", "description": "Get bill details" },
+          { "method": "DELETE", "path": "/api/bills/[id]", "status": "✅", "description": "Delete bill" },
+          { "method": "GET", "path": "/api/submissions/export", "status": "✅", "description": "Export submissions (CSV)" }
+        ]
+      },
+      "reimbursements_legacy": {
+        "total": 5,
+        "status": "⚠️ UNCLEAR - May be legacy/unused",
+        "issue": "auth() import error in route.ts",
+        "endpoints": [
+          { "method": "GET", "path": "/api/reimbursements", "status": "❌ Has error" },
+          { "method": "POST", "path": "/api/reimbursements", "status": "❌ Has error" },
+          { "method": "GET", "path": "/api/reimbursements/[id]", "status": "❌ Has error" },
+          { "method": "PATCH", "path": "/api/reimbursements/[id]", "status": "❌ Has error" },
+          { "method": "DELETE", "path": "/api/reimbursements/[id]", "status": "❌ Has error" }
+        ]
+      },
+      "auth": {
+        "total": 1,
+        "endpoints": [
+          { "method": "ALL", "path": "/api/auth/[...nextauth]", "status": "✅", "description": "NextAuth credentials auth" }
+        ]
+      }
+    }
+  },
+  "components": {
+    "total": 4,
+    "implemented": [
+      {
+        "name": "AuthProvider",
+        "file": "src/components/AuthProvider.tsx",
+        "type": "use client component",
+        "status": "✅ Complete",
+        "purpose": "NextAuth SessionProvider wrapper",
+        "used_in": "Root layout"
+      },
+      {
+        "name": "Navbar",
+        "file": "src/components/Navbar.tsx",
+        "type": "use client component",
+        "status": "✅ Complete",
+        "purpose": "Application navigation bar",
+        "features": ["Display session", "Sign-in/out buttons", "Responsive layout"]
+      },
+      {
+        "name": "ServiceWorkerRegister",
+        "file": "src/components/ServiceWorkerRegister.tsx",
+        "type": "use client component",
+        "status": "✅ Complete",
+        "purpose": "PWA/offline support via service worker"
+      },
+      {
+        "name": "ReimbursementDashboard",
+        "file": "src/components/reimbursement-dashboard.tsx",
+        "type": "use client component",
+        "status": "✅ Complete",
+        "purpose": "Display and manage reimbursements",
+        "note": "May be legacy - separate from trips/expenses workflow"
+      }
+    ],
+    "missing_needed": [
+      { "name": "TripCard", "purpose": "Reusable trip display component", "priority": "Medium" },
+      { "name": "ExpenseCard", "purpose": "Reusable expense item display", "priority": "Medium" },
+      { "name": "DataTable", "purpose": "Generic table for lists", "priority": "High" },
+      { "name": "Modal", "purpose": "Reusable dialog/modal component", "priority": "High" },
+      { "name": "FormBuilder", "purpose": "Componentized form builder", "priority": "Low" },
+      { "name": "FileUpload", "purpose": "File upload for bills/receipts", "priority": "High" }
+    ]
+  },
+  "incomplete_features": {
+    "critical_gaps": [
+      {
+        "category": "Trip Management",
+        "issue": "No way to create trips from UI",
+        "current": "API works but no /trips/new page",
+        "usage": "CRITICAL - users can't start trips"
+      },
+      {
+        "category": "Trip Management",
+        "issue": "No trip detail view",
+        "current": "No /trips/[id] page exists",
+        "usage": "CRITICAL - can't view trip or its expenses"
+      },
+      {
+        "category": "Expense Management",
+        "issue": "No way to view/edit expenses",
+        "current": "No /trips/[id]/expenses/[id] page",
+        "usage": "CRITICAL - can't view created expenses"
+      },
+      {
+        "category": "Bill Management",
+        "issue": "No receipt/bill upload UI",
+        "current": "APIs exist but no interface",
+        "usage": "IMPORTANT - can't attach receipts to expenses"
+      },
+      {
+        "category": "User Profile",
+        "issue": "No profile/settings pages",
+        "current": "APIs exist but 0% UI completion",
+        "usage": "MEDIUM - Payment card management only"
+      }
+    ],
+    "missing_pages": [
+      { "path": "/trips/new", "purpose": "Create new trip", "priority": "CRITICAL" },
+      { "path": "/trips/[id]", "purpose": "View trip details and expenses", "priority": "CRITICAL" },
+      { "path": "/trips/[id]/expenses/[id]", "purpose": "View/edit expense", "priority": "HIGH" },
+      { "path": "/trips/analytics", "purpose": "Trip analytics", "priority": "MEDIUM", "note": "REFERENCED IN NAVBAR BUT MISSING" },
+      { "path": "/profile", "purpose": "User profile settings", "priority": "MEDIUM" },
+      { "path": "/profile/payment-cards", "purpose": "Manage payment methods", "priority": "MEDIUM" }
+    ],
+    "known_runtime_errors": [
+      {
+        "severity": "🔴 HIGH",
+        "error": "TypeError: (0 , _lib_auth__WEBPACK_IMPORTED_MODULE_0__.auth) is not a function",
+        "file": "src/app/api/reimbursements/route.ts:7:29",
+        "cause": "Using auth() instead of getServerSession(authOptions)",
+        "impact": "All /api/reimbursements endpoints broken",
+        "fix": "Replace auth() with getServerSession(authOptions) - see auth.ts for authOptions export"
+      },
+      {
+        "severity": "🟡 MEDIUM",
+        "error": "Requested and resolved page mismatch",
+        "file": "Dynamic routes in (submitter)",
+        "cause": "Unclear - possibly bracket notation issue",
+        "impact": "Route building warnings",
+        "fix": "Full rebuild: npm run build"
+      },
+      {
+        "severity": "🟡 MEDIUM",
+        "error": "ENOENT: routes-manifest.json not found",
+        "cause": "Build cache is stale after route changes",
+        "impact": "Development server instability",
+        "fix": "rm -rf .next && npm run build"
+      }
+    ]
+  },
+  "incomplete_features_by_priority": {
+    "CRITICAL_NOW": [
+      "Trip creation (/trips/new)",
+      "Trip viewing (/trips/[id])",
+      "Expense viewing (/trips/[id]/expenses/[id])",
+      "Fix auth() runtime error in /api/reimbursements"
+    ],
+    "IMPORTANT_SOON": [
+      "Bill/receipt upload UI",
+      "Payment card management UI",
+      "Form submission page for submitters",
+      "User profile page"
+    ],
+    "NICE_TO_HAVE": [
+      "Trip analytics dashboard (/trips/analytics)",
+      "Admin analytics",
+      "Report generation",
+      "Component extraction/refactoring"
+    ]
+  },
+  "estimated_completion_by_component": {
+    "pages": "53% (9/17 pages)",
+    "api_endpoints": "100% (38/38 endpoints - but 5 may be legacy/unused)",
+    "components": "40% (4/10 commonly needed components)",
+    "features": "65% (core workflow ~70%, admin ~80%, analytics 0%)",
+    "overall": "65%"
+  },
+  "workflow_status": {
+    "submitter_workflow": {
+      "create_trip": "❌ No UI (API 100%)",
+      "add_expenses": "✅ Complete",
+      "view_expenses": "❌ No detail view",
+      "upload_receipts": "❌ No UI (API 100%)",
+      "submit_forms": "❌ No UI (API 100%)",
+      "track_reimbursement": "⚠️ May be legacy"
+    },
+    "admin_workflow": {
+      "create_forms": "✅ Complete",
+      "manage_forms": "✅ Complete",
+      "review_submissions": "✅ Complete",
+      "approve_reject": "✅ Complete",
+      "export_data": "✅ Complete",
+      "view_analytics": "❌ Not implemented"
+    }
+  }
+}

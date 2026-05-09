@@ -1,0 +1,403 @@
+﻿// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ========== GROUPS ==========
+model Group {
+  id               String   @id @default(cuid())
+  groupId          String   @unique
+  secretKey        String
+  
+  name             String
+  description      String?
+  
+  createdById      String
+  createdBy        User     @relation("GroupCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  members          GroupMembership[]
+  formTemplates    FormTemplate[]
+  submissions      Submission[]
+}
+
+model GroupMembership {
+  id               String   @id @default(cuid())
+  groupId          String
+  group            Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role             String   @default("MEMBER") // MEMBER, HEAD
+  
+  joinedAt         DateTime @default(now())
+  
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+// ========== DIRECT MESSAGES ==========
+model DirectMessage {
+  id               String     @id @default(cuid())
+  
+  senderId         String
+  sender           User       @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId       String
+  receiver         User       @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  encryptedContent String     // AES encrypted content
+  contentHash      String     // For verification
+  
+  isRead           Boolean    @default(false)
+  readAt           DateTime?
+  
+  // Diffie-Hellman Key Exchange fields for Group Join Requests
+  isDHRequest      Boolean    @default(false)
+  dhPayload        String?    // JSON with p, g, public key, etc.
+  
+  createdAt        DateTime   @default(now())
+  
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+// ========== AUTHENTICATION & USER PROFILE ==========
+model User {
+  id               String     @id @default(cuid())
+  username         String     @unique @default(cuid()) // Will be updated on creation
+  
+  email            String     @unique
+  password         String?    // For credentials provider
+  emailVerified    DateTime?
+  name             String?
+  image            String?
+  
+  // Profile data - Auto-fill for forms
+  empCode          String?    // Employee code
+  designation      String?    // Job title
+  department       String?    // Department name
+  gradeLvl         String?    // Grade/Pay level
+  bankAccount      String?    // Bank account number (encrypted)
+  ifscCode         String?    // IFSC code
+  
+  // Roles and permissions
+  role             String     @default("SUBMITTER") // SUBMITTER, ADMINISTRATOR
+  isFormHost       Boolean    @default(false)
+  userPurpose      String?    // FLOATING_FORMS or MANAGING_EXPENSES
+  
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  
+  // Relations
+  accounts              Account[]
+  sessions              Session[]
+  paymentCards          PaymentCard[]
+  trips                 Trip[]
+  expenses              Expense[] @relation("expenseSubmitter")
+  formsCreated          FormTemplate[] @relation("formsCreated")
+  formSubmissions       Submission[] @relation("formSubmitter")
+  reimbursements        Reimbursement[]  // Backward compatibility
+  approvals             Approval[]
+  
+  groupsCreated         Group[] @relation("GroupCreator")
+  groupMemberships      GroupMembership[]
+  sentMessages          DirectMessage[] @relation("sender")
+  receivedMessages      DirectMessage[] @relation("receiver")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+}
+
+// ========== PAYMENT METHODS ==========
+model PaymentCard {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  label        String   // User-given name: "Visa ending 1234"
+  cardType     String   // Visa, Mastercard, RuPay, Bank Transfer, UPI, Cash
+  maskedNumber String   // "****1234"
+  
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+}
+
+// ========== TRIP MANAGEMENT ==========
+model Trip {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title            String   // Name of trip/project
+  startDate        DateTime
+  isCompleted      Boolean  @default(false)
+  advanceDrawn     Float    @default(0) // Money drawn from company
+  budgetHead       String?  // Cost center or department code
+  purpose          String?  // Purpose of journey
+  notes            String?
+  
+  isArchived       Boolean  @default(false)
+  isFavorite       Boolean  @default(false)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  expenses         Expense[]
+  submissions      Submission[]
+  
+  @@index([userId])
+}
+
+// ========== EXPENSES ==========
+model Expense {
+  id                 String   @id @default(cuid())
+  tripId             String
+  trip               Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  submittedById      String
+  submittedBy        User     @relation("expenseSubmitter", fields: [submittedById], references: [id], onDelete: Cascade)
+  
+  // Categorization
+  category           String   // Travel, Other, Personal
+  expenseType        String   // Air, Train, Taxi, Bus, Food, Lodging, Registration, Visa, etc
+  
+  // Core details
+  title              String
+  amount             Float
+  currency           String   // INR, USD, EUR, GBP, JPY, etc
+  paymentDate        DateTime
+  paymentMethod      String?  // "Cash", "Credit Card", or reference to PaymentCard
+  
+  // Optional fields (JSON metadata for flexibility by expense type)
+  metadata           String?  // JSON: {from, to, mode, pnr, class, distance, departure_time, etc}
+  description        String?
+  vendor             String?  // Vendor/Hotel/Restaurant name
+  billNumber         String?  // Invoice/Bill/GSTIN number
+  transactionNumber  String?  // Transaction ID
+  numDays            Int?     // For accommodation expenses
+  
+  // Approval status
+  status             String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, REJECTED, REIMBURSED
+  submittedAt        DateTime?
+  approvedAt         DateTime?
+  rejectedAt         DateTime?
+  approverRemarks    String?
+  
+  // Offline sync tracking
+  syncStatus         String   @default("pending") // pending, synced, error
+  isLocalOnly        Boolean  @default(false)    // Created offline
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  // Relations
+  bills              BillFile[]
+  
+  @@index([tripId])
+  @@index([submittedById])
+}
+
+// ========== BILLS / RECEIPTS (Binary File Storage) ==========
+model BillFile {
+  id              String   @id @default(cuid())
+  expenseId       String
+  expense         Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  
+  fileName        String   // Original file name (e.g., "receipt.pdf")
+  fileData        Bytes    // Binary file data (stored directly, not URL reference!)
+  fileType        String   // MIME type (application/pdf, image/jpeg, etc)
+  fileSize        Int      // Size in bytes
+  
+  uploadedAt      DateTime @default(now())
+  
+  @@index([expenseId])
+}
+
+// ========== FORM TEMPLATES (Admin-Created) ==========
+model FormTemplate {
+  id               String   @id @default(cuid())
+  groupId          String
+  group            Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  createdById      String
+  createdBy        User     @relation("formsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  
+  title            String   // e.g., "TA Form - IIT Ropar"
+  description      String?
+  
+  // Template schema as JSON (drag-drop layout)
+  templateSchema   String   // JSON: {fields[], tables[], staticText[], calculations[]}
+  
+  // Status
+  isActive         Boolean  @default(true)
+  version          Int      @default(1)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  submissions      Submission[]
+  
+  @@unique([groupId, title])
+  @@index([groupId])
+  @@index([createdById])
+}
+
+// ========== FORM SUBMISSIONS ==========
+model Submission {
+  id               String   @id @default(cuid())
+  templateId       String
+  template         FormTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  tripId           String
+  trip             Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  userId           String
+  user             User     @relation("formSubmitter", fields: [userId], references: [id], onDelete: Cascade)
+  
+  groupId          String
+  group            Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  // Generated files
+  generatedPdf     Bytes?   // PDF as binary
+  generatedExcel   Bytes?   // Excel as binary
+  generatedZip     Bytes?   // ZIP bundle as binary
+  
+  // Status tracking
+  status           String   @default("DRAFT") // DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, REIMBURSED
+  submissionDate   DateTime?
+  reviewNotes      String?
+  formData         String?  // JSON
+  signatures       String?  // JSON mapping of signature_authority field IDs to booleans (approved or not)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([templateId])
+  @@index([tripId])
+  @@index([userId])
+  @@index([groupId])
+}
+
+// ========== CURRENCY EXCHANGE RATES (Cached) ==========
+model ExchangeRate {
+  id               String   @id @default(cuid())
+  fromCurrency     String   // INR
+  toCurrency       String   // USD
+  rate             Float    // Current exchange rate
+  
+  lastUpdated      DateTime @default(now())
+  expiresAt        DateTime // TTL: 24 hours
+  
+  @@unique([fromCurrency, toCurrency])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+}
+
+// ========== BACKWARD COMPATIBILITY (Legacy Reimbursement) ==========
+model Reimbursement {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title         String
+  amount        Float
+  category      String   // Travel, Meals, Supplies, Tools, Training
+  description   String?
+  receiptNotes  String?
+  
+  status        String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, REJECTED, PAID
+  submittedAt   DateTime?
+  approvedAt    DateTime?
+  rejectedAt    DateTime?
+  paidAt        DateTime?
+  
+  currentApprover String?
+  rejectionReason String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  attachments   Attachment[]
+  approvals     Approval[] @relation("reimbursements")
+  
+  @@index([userId])
+}
+
+model Attachment {
+  id              String   @id @default(cuid())
+  reimbursementId String
+  reimbursement   Reimbursement @relation(fields: [reimbursementId], references: [id], onDelete: Cascade)
+  
+  fileName        String
+  fileUrl         String
+  fileSize        Int
+  uploadedAt      DateTime @default(now())
+  
+  @@index([reimbursementId])
+}
+
+model Approval {
+  id              String   @id @default(cuid())
+  reimbursementId String
+  reimbursement   Reimbursement @relation("reimbursements", fields: [reimbursementId], references: [id], onDelete: Cascade)
+  
+  approverId      String
+  approver        User     @relation(fields: [approverId], references: [id], onDelete: Cascade)
+  
+  status          String   // PENDING, APPROVED, REJECTED
+  remarks         String?
+  approvedAt      DateTime?
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([reimbursementId])
+  @@index([approverId])
+}
+

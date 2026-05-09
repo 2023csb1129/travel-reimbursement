@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  
+  /* Royal Modern Theme - Green & Gold Colors */
+  /* Primary: Royal Green & Light Sage */
+  --primary: #1b5e3f;
+  --primary-dark: #134d32;
+  --primary-light: #2d7d5a;
+  --primary-lighter: #d1e8dd;
+  --primary-lightest: #e8f5f1;
+  
+  /* Secondary: Royal Gold & Light Gold */
+  --secondary: #d4af37;
+  --secondary-light: #e6c547;
+  --secondary-lighter: #fef3c7;
+  --secondary-lightest: #fef9e7;
+  
+  /* Accent Colors */
+  --accent: #06b6d4;
+  --accent-light: #22d3ee;
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  
+  /* Backgrounds */
+  --bg-primary: #fafbfa;
+  --bg-secondary: #e8f5f1;
+  --bg-tertiary: #fef9e7;
+  --bg-glass: rgba(255, 255, 255, 0.5);
+  
+  /* Borders & Text */
+  --border: #d1e8dd;
+  --border-subtle: #e8f5f1;
+  --text-primary: #1a3a2e;
+  --text-secondary: #1b5e3f;
+  --text-muted: #5a6f6a;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #1b5e3f 0%, #2d7d5a 100%);
+  --gradient-secondary: linear-gradient(135deg, #d4af37 0%, #e6c547 100%);
+  --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(27, 94, 63, 0.1);
+  --shadow-md: 0 4px 12px rgba(27, 94, 63, 0.15);
+  --shadow-lg: 0 8px 24px rgba(27, 94, 63, 0.2);
+  --shadow-xl: 0 12px 40px rgba(27, 94, 63, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Scrollbar styling - Hidden per request */
+::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  height: 0px;
+}
+
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
