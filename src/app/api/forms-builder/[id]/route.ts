@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, context: { params: Params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const adminGroup = user.groupMemberships.find(m => m.role === "HEAD");
+    const adminGroup = user.groupMemberships.find((m: any) => m.role === "HEAD");
     if (!adminGroup) {
       return NextResponse.json({ error: "User is not a group head" }, { status: 403 });
     }
@@ -71,7 +71,7 @@ export async function PUT(req: NextRequest, context: { params: Params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const adminGroup = user.groupMemberships.find(m => m.role === "HEAD");
+    const adminGroup = user.groupMemberships.find((m: any) => m.role === "HEAD");
     if (!adminGroup) {
       return NextResponse.json({ error: "User is not a group head" }, { status: 403 });
     }
@@ -134,7 +134,7 @@ export async function DELETE(req: NextRequest, context: { params: Params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const adminGroup = user.groupMemberships.find(m => m.role === "HEAD");
+    const adminGroup = user.groupMemberships.find((m: any) => m.role === "HEAD");
     if (!adminGroup) {
       return NextResponse.json({ error: "User is not a group head" }, { status: 403 });
     }
