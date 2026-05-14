@@ -494,7 +494,7 @@ function SignInContent() {
           background: "#f8fafc",
           overflow: "hidden",
           transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-          whiteSpace: "nowrap"
+          whiteSpace: "normal"
         }}>
           <div style={{ opacity: mode === "signup" ? 1 : 0, transition: "opacity 0.4s ease 0.1s", pointerEvents: mode === "signup" ? "auto" : "none", minWidth: "300px", display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
             <div style={{
@@ -526,7 +526,8 @@ function SignInContent() {
                   display: "flex",
                   alignItems: "center",
                   gap: "1rem",
-                  textAlign: "left"
+                  textAlign: "left",
+                  minWidth: 0,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "rgba(109, 40, 217, 0.05)";
@@ -538,9 +539,9 @@ function SignInContent() {
                 }}
               >
                 <div style={{ fontSize: "2rem" }}>👤</div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: "1.1rem", marginBottom: "0.25rem" }}>User</div>
-                  <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Submit expense reports</div>
+                  <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.35, whiteSpace: "normal", overflowWrap: "break-word" }}>Submit expense reports</div>
                 </div>
               </button>
 
@@ -560,7 +561,8 @@ function SignInContent() {
                   display: "flex",
                   alignItems: "center",
                   gap: "1rem",
-                  textAlign: "left"
+                  textAlign: "left",
+                  minWidth: 0,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "rgba(109, 40, 217, 0.05)";
@@ -572,9 +574,9 @@ function SignInContent() {
                 }}
               >
                 <div style={{ fontSize: "2rem" }}>👔</div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: "1.1rem", marginBottom: "0.25rem" }}>Reimbursifier</div>
-                  <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Manage and approve reimbursements</div>
+                  <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.35, whiteSpace: "normal", overflowWrap: "break-word" }}>Manage and approve reimbursements</div>
                 </div>
               </button>
             </div>

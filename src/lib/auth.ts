@@ -102,8 +102,18 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, account }: any) {
       if (user) {
+        // Always ensure we have the correct database ID, especially for OAuth
+        if (user.email) {
+          const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role;
+            token.username = dbUser.username;
+            return token;
+          }
+        }
         token.id = user.id;
         token.role = user.role;
         token.username = user.username;

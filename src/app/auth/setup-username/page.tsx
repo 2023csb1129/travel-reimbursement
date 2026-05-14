@@ -1,11 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { signIn } from "next-auth/react";
 
-export default function SetupUsernamePage() {
+function SetupUsernameContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -130,5 +131,13 @@ export default function SetupUsernamePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SetupUsernamePage() {
+  return (
+    <Suspense fallback={null}>
+      <SetupUsernameContent />
+    </Suspense>
   );
 }
