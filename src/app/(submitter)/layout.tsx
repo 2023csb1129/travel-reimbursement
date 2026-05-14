@@ -57,7 +57,7 @@ export default function SubmitterLayout({
   ];
 
   const profileItems = [
-    { label: "Payment Cards", icon: CreditCard, href: "/profile", key: "cards", colorClass: "bg-emerald-500" },
+    { label: "Payment Methods", icon: CreditCard, href: "/profile", key: "cards", colorClass: "bg-emerald-500" },
     { label: "Dashboard", icon: BarChart2, href: "/trips/analytics", key: "analytics", colorClass: "bg-rose-500" },
   ];
 
@@ -73,7 +73,7 @@ export default function SubmitterLayout({
   } else if (pathname?.startsWith("/responses")) {
     dynamicTitle = "My Responses";
   } else if (pathname?.startsWith("/profile")) {
-    dynamicTitle = "Payment Cards";
+    dynamicTitle = "Payment Methods";
   }
 
   return (
