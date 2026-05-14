@@ -39,6 +39,7 @@ interface Expense {
   paymentDate: string;
   status: string;
   tripId: string;
+  bills?: any[];
 }
 
 export const TripsDashboard = forwardRef((_, ref) => {
