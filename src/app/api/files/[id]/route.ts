@@ -49,3 +49,45 @@ export async function GET(
     return NextResponse.json({ error: "Failed to fetch file" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const billFile = await prisma.billFile.findUnique({
+      where: { id },
+      include: {
+        expense: {
+          include: {
+            trip: { select: { userId: true } },
+          },
+        },
+      },
+    });
+
+    if (!billFile) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
+    if (billFile.expense.trip.userId !== session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await prisma.billFile.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: "File deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    return NextResponse.json({ error: "Failed to delete file" }, { status: 500 });
+  }
+}

@@ -30,6 +30,7 @@ export async function GET(
     const expenses = await prisma.expense.findMany({
       where: { tripId: id },
       orderBy: { paymentDate: "desc" },
+      include: { bills: true },
     });
 
     return NextResponse.json({ expenses });

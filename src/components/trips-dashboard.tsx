@@ -86,6 +86,7 @@ export const TripsDashboard = forwardRef((_, ref) => {
     currency: "INR",
     metadata: {} as Record<string, any>,
     files: [] as File[],
+    existingBills: [] as any[],
   });
 
   useImperativeHandle(ref, () => ({
@@ -321,7 +322,7 @@ export const TripsDashboard = forwardRef((_, ref) => {
           }
         }
 
-        setExpenseForm({ title: "", amount: "", category: "Travel", expenseType: "", paymentDate: getTodayDate(), paymentMethod: "Cash", description: "", currency: "INR", metadata: {}, files: [] });
+        setExpenseForm({ title: "", amount: "", category: "Travel", expenseType: "", paymentDate: getTodayDate(), paymentMethod: "Cash", description: "", currency: "INR", metadata: {}, files: [], existingBills: [] });
         setEditingExpenseId(null);
         setShowAddExpenseForm(false);
         setSidebarView("trip-detail");
@@ -341,7 +342,7 @@ export const TripsDashboard = forwardRef((_, ref) => {
         };
         setTripExpenses(prev => [...prev, tempExpense]);
         cacheSingleExpense(tempExpense).catch(() => {});
-        setExpenseForm({ title: "", amount: "", category: "Travel", expenseType: "", paymentDate: getTodayDate(), paymentMethod: "Cash", description: "", currency: "INR", metadata: {}, files: [] });
+        setExpenseForm({ title: "", amount: "", category: "Travel", expenseType: "", paymentDate: getTodayDate(), paymentMethod: "Cash", description: "", currency: "INR", metadata: {}, files: [], existingBills: [] });
         setSidebarView("trip-detail");
         alert("Expense saved offline — will sync when back online.");
       } else {
@@ -373,9 +374,35 @@ export const TripsDashboard = forwardRef((_, ref) => {
         } catch { return {}; }
       })(),
       files: [],
+      existingBills: expense.bills || [],
     });
     setEditingExpenseId(expense.id);
     setSidebarView("edit-expense");
+  };
+
+  const handleDeleteExistingBill = async (billId: string) => {
+    if (!confirm("Are you sure you want to delete this attachment?")) return;
+    try {
+      const res = await fetch(`/api/files/${billId}`, { method: "DELETE" });
+      if (res.ok) {
+        setExpenseForm(prev => ({
+          ...prev,
+          existingBills: prev.existingBills.filter(b => b.id !== billId)
+        }));
+        // Update the cached/state expense
+        setTripExpenses(prev => prev.map(exp => {
+          if (exp.id === editingExpenseId) {
+            return { ...exp, bills: exp.bills?.filter((b: any) => b.id !== billId) };
+          }
+          return exp;
+        }));
+      } else {
+        alert("Failed to delete attachment");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting attachment");
+    }
   };
 
   const handleDeleteExpense = async (e: React.MouseEvent, expenseId: string) => {
@@ -975,11 +1002,11 @@ export const TripsDashboard = forwardRef((_, ref) => {
                     cursor: "pointer",
                   }}
                 />
-                {expenseForm.files.length > 0 && (
+                 {expenseForm.files.length > 0 && (
                   <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {expenseForm.files.map((file, index) => (
                       <div
-                        key={index}
+                        key={`new-${index}`}
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
@@ -991,7 +1018,7 @@ export const TripsDashboard = forwardRef((_, ref) => {
                           fontSize: "0.8rem",
                         }}
                       >
-                        <span style={{ color: "#5a6f6a" }}>{file.name}</span>
+                        <span style={{ color: "#5a6f6a" }}>{file.name} (New)</span>
                         <button
                           type="button"
                           onClick={() => setExpenseForm({
@@ -1009,6 +1036,45 @@ export const TripsDashboard = forwardRef((_, ref) => {
                           }}
                         >
                           ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {expenseForm.existingBills && expenseForm.existingBills.length > 0 && (
+                  <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <p style={{ margin: "0", fontSize: "0.85rem", fontWeight: "600", color: "#5a6f6a" }}>Previously Uploaded:</p>
+                    {expenseForm.existingBills.map((bill: any) => (
+                      <div
+                        key={`existing-${bill.id}`}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "0.5rem",
+                          background: "#f0fdf4",
+                          border: "1px solid #d1fae5",
+                          borderRadius: "0.3rem",
+                          fontSize: "0.8rem",
+                        }}
+                      >
+                        <span style={{ color: "#166534", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          📄 <a href={`/api/files/${bill.id}`} target="_blank" rel="noreferrer" style={{ color: "#166534", textDecoration: "underline" }}>{bill.fileName}</a>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteExistingBill(bill.id)}
+                          style={{
+                            padding: "0.25rem 0.5rem",
+                            background: "#ef4444",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "0.2rem",
+                            cursor: "pointer",
+                            fontSize: "0.7rem",
+                          }}
+                        >
+                          Delete
                         </button>
                       </div>
                     ))}
@@ -1070,7 +1136,7 @@ export const TripsDashboard = forwardRef((_, ref) => {
                   <button
                     onClick={() => {
                       setSelectedTripId(tripDetails.id);
-                      setExpenseForm({ title: "", amount: "", category: "Travel", expenseType: "", paymentDate: getTodayDate(), paymentMethod: "Cash", currency: "INR", description: "", metadata: {}, files: [] });
+                      setExpenseForm({ title: "", amount: "", category: "Travel", expenseType: "", paymentDate: getTodayDate(), paymentMethod: "Cash", currency: "INR", description: "", metadata: {}, files: [], existingBills: [] });
                       setSidebarView("add-expense");
                     }}
                     style={{ padding: "0.5rem 1rem", background: "#1b5e3f", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem" }}
